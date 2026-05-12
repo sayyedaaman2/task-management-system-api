@@ -1,0 +1,24 @@
+{
+  "name": "task-management-system-api",
+  "version": "1.0.0",
+  "description": "Task management system api",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev" : "ts-node src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github-personal:sayyedaaman2/task-management-system-api.git"
+  },
+  "author": "Sayyed Aaman",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^25.7.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
+  }
+}
