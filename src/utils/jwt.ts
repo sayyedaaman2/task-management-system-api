@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import type { JwtPayload, SignOptions } from "jsonwebtoken";
 
 import serverConfig from "@/config/env.js";
+import { AppError } from "@/utils/error.js";
 
 // Define the shape of your specific payload
 export interface ITokenPayload extends JwtPayload {
@@ -41,11 +42,11 @@ export const verifyToken = (token: string, isRefreshToken = false): ITokenPayloa
     return jwt.verify(token, secret) as ITokenPayload;
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
-      throw new Error("Token has expired");
+      throw new AppError("Token has expired");
     } else if (error instanceof jwt.JsonWebTokenError) {
-      throw new Error("Invalid token");
+      throw new AppError("Invalid token");
     }
-    throw new Error("Token verification failed");
+    throw new AppError("Token verification failed");
   }
 };
 
@@ -67,16 +68,16 @@ export const refreshToken = (token: string): string => {
       ignoreExpiration: true,
     }) as ITokenPayload;
     if (!decoded) {
-      throw new Error("Invalid token payload");
+      throw new AppError("Invalid token payload");
     }
 
     // 2. Return a NEW Access Token (isRefreshToken = false)
     return generateToken(decoded, false);
   } catch (error) {
     if (error instanceof jwt.JsonWebTokenError) {
-      throw new Error("Invalid refresh token signature");
+      throw new AppError("Invalid refresh token signature");
     }
-    throw new Error("Token refresh failed");
+    throw new AppError("Token refresh failed");
   }
 };
 

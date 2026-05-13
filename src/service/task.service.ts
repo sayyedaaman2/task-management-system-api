@@ -1,5 +1,6 @@
 import TaskModel, { type ITask } from "@/model/task.model.js";
 import UserModel from "@/model/user.model.js";
+import {AppError} from "@/utils/error.js";
 interface QueryParams {
   page?: number;
   limit?: number;
@@ -15,7 +16,7 @@ class TaskService {
     // check assigning user is exist or not will be done in controller layer
     const assignedToUser = await UserModel.findById(taskData.assignedTo);
     if (!assignedToUser) {
-      throw new Error("assignedTo not found");
+      throw new AppError("assignedTo not found",404);
     }
     const task = new TaskModel(taskData);
     return await task.save();
