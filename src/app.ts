@@ -1,6 +1,16 @@
+import type{Express, Request, Response} from 'express'
+import express from 'express'
+
+// Create an instance of the Express application
+const app: Express = express()
+
+//middleware to parse JSON bodies
+app.use(express.json())
 
 
+app.get('/', (req: Request, res: Response) => {
+    res.send('Hello, World!')
+})
 
 
-const port = 3000;
-export default port;
+export default app;
