@@ -17,10 +17,9 @@ export const TaskStatus = {
   values: ["pending", "in progress", "completed"],
 } as const;
 
-
 export const TaskPriority = {
-  LOW: "Low",
-  MEDIUM: "Medium",
-  HIGH: "High",
-  values: ["Low", "Medium", "High"],
+  LOW: "low",
+  MEDIUM: "medium",
+  HIGH: "high",
+  values: ["low", "medium", "high"],
 } as const;
