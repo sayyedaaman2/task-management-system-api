@@ -6,8 +6,8 @@ import { corsMiddleware } from "@/middleware/cors.middleware.js";
 import { globalErrorHandler } from "@/middleware/error.middleware.js";
 import { helmetMiddleware } from "@/middleware/helmet.middleware.js";
 import { requestLogger } from "@/middleware/logger.middleware.js";
-import { rateLimitMiddleware } from "@/middleware/ratelimit.middleware.js";
 import { notFound } from "@/middleware/notfound.middleware.js";
+import { rateLimitMiddleware } from "@/middleware/ratelimit.middleware.js";
 
 // Create an instance of the Express application
 const app: Express = express();
