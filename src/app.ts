@@ -3,6 +3,8 @@ import express from 'express'
 
 import serverConfig from '@/config/env.js'
 import { corsMiddleware } from '@/middleware/cors.middleware.js'
+import { globalErrorHandler } from '@/middleware/error.middleware.js'
+
 // Create an instance of the Express application
 const app: Express = express()
 
@@ -32,5 +34,7 @@ app.get('/', (req: Request, res: Response) => {
 
 
 
+// global error handler
+app.use(globalErrorHandler)
 
 export default app;
