@@ -4,6 +4,7 @@ import UserModel from "@/model/user.model.js";
 
 import type { IUser, IUserDocument } from "@/model/user.model.js";
 import type { ITask, ITaskDocument } from "@/model/task.model.js";
+import { TaskStatus } from "@/utils/constant.js";
 
 interface GetUsersQuery {
   page?: string;
@@ -185,6 +186,65 @@ class AdminService {
     }
     return deletedUser;
   }
+
+ async analyzeUserActivity(userId: string) {
+    const totalTasks = await TaskModel.countDocuments({ assignedTo: userId });
+    const completedTasks = await TaskModel.countDocuments({ assignedTo: userId, status: "completed" });
+    const pendingTasks = await TaskModel.countDocuments({ assignedTo: userId, status: "pending" });
+    const overdueTasks = await TaskModel.countDocuments({ assignedTo: userId, dueDate: { $lt: new Date() }, status: { $ne: "completed" } });
+
+    return {
+      totalTasks,
+      completedTasks,
+      pendingTasks,
+      overdueTasks,
+    };
+  }
+  async analyzeSystemUsage() {
+
+  // date for active users
+  const last30Days = new Date(
+    Date.now() - 30 * 24 * 60 * 60 * 1000
+  );
+
+  // run queries in parallel
+  const [
+    totalUsers,
+    activeUsers,
+    totalTasks,
+    completedTasks,
+    pendingTasks,
+  ] = await Promise.all([
+
+    UserModel.countDocuments(),
+
+    UserModel.countDocuments({
+      lastLogin: {
+        $gte: last30Days,
+      },
+    }),
+
+    TaskModel.countDocuments(),
+
+    TaskModel.countDocuments({
+      status: TaskStatus.COMPLETED,
+    }),
+
+    TaskModel.countDocuments({
+      status: TaskStatus.PENDING,
+    }),
+
+  ]);
+
+  return {
+    totalUsers,
+    activeUsers,
+    totalTasks,
+    completedTasks,
+    pendingTasks,
+  };
+}
+
 }
 
 export default new AdminService();
