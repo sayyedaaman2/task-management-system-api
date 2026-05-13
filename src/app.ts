@@ -5,6 +5,7 @@ import serverConfig from "@/config/env.js";
 import { corsMiddleware } from "@/middleware/cors.middleware.js";
 import { globalErrorHandler } from "@/middleware/error.middleware.js";
 import { requestLogger } from "@/middleware/logger.middleware.js";
+import { notFound } from "@/middleware/notfound.middleware.js";
 
 // Create an instance of the Express application
 const app: Express = express();
@@ -31,6 +32,9 @@ app.use(corsMiddleware(corsOptions));
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello, World!");
 });
+
+// not found routes
+app.use(notFound);
 
 // global error handler
 app.use(globalErrorHandler);
