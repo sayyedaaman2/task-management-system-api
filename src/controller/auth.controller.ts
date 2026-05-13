@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 
 import authService from "@/service/auth.service.js";
+import { AppError } from "@/utils/error.js";
 import { generateToken, verifyToken } from "@/utils/jwt.js";
 
 export const register = async (req: Request, res: Response, next: NextFunction) => {
@@ -21,7 +22,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     const user = await authService.login(email, password);
 
     if (!user) {
-      return res.status(401).json({ message: "Invalid email or password" });
+      throw new AppError("Invalid email or password", 401);
     }
 
     // Generate Access Token
@@ -72,9 +73,7 @@ export const refreshToken = async (req: Request, res: Response, next: NextFuncti
     const refreshToken = req.cookies.refreshToken;
 
     if (!refreshToken) {
-      return res.status(401).json({
-        message: "Refresh token missing",
-      });
+      throw new AppError("Refresh token missing", 401);
     }
 
     // verify refresh token
@@ -103,13 +102,11 @@ export const refreshToken = async (req: Request, res: Response, next: NextFuncti
 
 export const getProfile = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const userId = req.user?.id;
-        if (!userId) {
-            return res.status(400).json({ message: "User ID not found in token" });
-        }
-        const profile = await userService.getProfile(userId);
+        const userId = req.user?.userId;
+     
+        const profile = await authService.getProfile(userId);
         if (!profile) {
-            return res.status(404).json({ message: "User not found" });
+            throw new AppError("User not found",404);
         }
         res.status(200).json(profile);
     } catch (error) {

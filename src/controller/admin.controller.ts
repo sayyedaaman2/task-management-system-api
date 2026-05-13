@@ -2,6 +2,7 @@ import type {Request, Response, NextFunction} from 'express'
 
 import userService from "@/service/admin.service.js";
 import {AppError} from '@/utils/error.js'
+import adminService from '@/service/admin.service.js';
 
 
 export const getAllUsers = async (req: Request, res: Response,next:NextFunction) => {
@@ -47,6 +48,25 @@ export const deleteTask = async (req: Request, res: Response,next:NextFunction) 
     await userService.deleteTask(taskId)
     res.status(200).json({ message: 'Task deleted successfully' })
   } catch (error) {
+    next(error instanceof AppError ? error : new AppError('Failed to delete task', 500))
+  }
+}
+
+export const getUserActivity = async (req:Request,res:Response, next:NextFunction)=>{
+  try{
+      const userId = req.params.id;
+      const data = await adminService.analyzeUserActivity(userId);
+      res.status(200).json({message : "Successfully Fetched User Activities", data})
+  }catch(error){
+    next(error instanceof AppError ? error : new AppError('Failed to delete task', 500))
+  }
+}
+
+export const getSystemUsageData = async(req:Request,res:Response,Next:NextFunction)=>{
+   try{
+      const data = await adminService.analyzeSystemUsage();
+      res.status(200).json({message : "Successfully Fetched System Usage data", data})
+  }catch(error){
     next(error instanceof AppError ? error : new AppError('Failed to delete task', 500))
   }
 }
