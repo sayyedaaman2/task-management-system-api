@@ -10,7 +10,7 @@ export interface IUser {
     userStatus : typeof UserStatus.values[number];
 }
 
-
+export interface IUserDocument extends IUser, mongoose.Document {}
 
 const userSchema = new mongoose.Schema<IUser>({
     name : {
