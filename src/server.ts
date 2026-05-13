@@ -1,18 +1,24 @@
 import app from "./app.js";
 
-import serverConfig from '@/config/env.js'
-
-
-
+import serverConfig from "@/config/env.js";
+import logger from "@/utils/logger.js";
 
 async function startServer() {
-    try{
-        app.listen(serverConfig.port, () => {
-            console.log(`Server is running on port ${serverConfig.port} in ${serverConfig.nodeEnv} mode.`)
-        },)
-    }catch(error){  
-        console.error("Error starting server:", error)
-        process.exit(1)
-    }
+  try {
+    app.listen(serverConfig.port, () => {
+      logger.info(
+        `Server is running on port ${serverConfig.port} in ${serverConfig.nodeEnv} mode.`
+      );
+    });
+    
+  }catch (err) {
+  if (err instanceof Error) {
+    logger.error(`Error starting server: ${err.message}`);
+  } else {
+    logger.error("Unknown error starting server");
+  }
+
+  throw err;
 }
-void startServer()
+}
+void startServer();
