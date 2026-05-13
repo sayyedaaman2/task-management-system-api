@@ -49,6 +49,12 @@ const env = {
 
   jwtSecret: process.env.JWT_SECRET as string,
 
+  jwtExpiresIn: process.env.JWT_EXPIRES_IN as string,
+
+  jwtRefreshSecret: process.env.JWT_REFRESH_SECRET as string,
+
+  jwtRefreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN as string,
+
   bcryptSaltRounds: Number(process.env.BCRYPT_SALT_ROUNDS || 10),
 
   corsOrigin: process.env.CORS_ORIGIN || "*",
@@ -57,3 +63,7 @@ const env = {
 };
 
 export default Object.freeze(env);
+
+
+
+
