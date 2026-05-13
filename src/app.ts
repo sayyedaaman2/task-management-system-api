@@ -21,8 +21,6 @@ const app: Express = express();
 // Security middleware
 app.use(helmetMiddleware);
 
-
-
 //cors middleware
 const corsOptions = {
   origin: serverConfig.corsOrigin,

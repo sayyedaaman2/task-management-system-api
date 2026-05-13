@@ -5,8 +5,7 @@ import logger from "@/utils/logger.js";
  * Production-ready MongoDB connection utility.
  * Note: Mongoose 6+ (including 9.x) does not require useNewUrlParser or useUnifiedTopology.
  */
-const connectDB = async (uri:string) => {
-
+const connectDB = async (uri: string) => {
   if (!uri) {
     logger.error("MONGO_URI is missing in environment variables");
     throw new Error("MONGO_URI is required to connect to MongoDB");

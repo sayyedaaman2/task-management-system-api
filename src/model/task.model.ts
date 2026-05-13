@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-import { TaskStatus,TaskPriority } from "@/utils/constant.js";
+import { TaskStatus, TaskPriority } from "@/utils/constant.js";
 
 export interface ITask {
   title: string;
@@ -27,8 +27,8 @@ const taskSchema = new mongoose.Schema(
       default: TaskStatus.PENDING,
     },
     priority: {
-      type  : String,
-      enum  : TaskPriority.values,
+      type: String,
+      enum: TaskPriority.values,
       default: TaskPriority.MEDIUM,
     },
     dueDate: {

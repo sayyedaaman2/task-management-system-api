@@ -2,7 +2,6 @@ import path from "node:path";
 
 import dotenv from "dotenv";
 
-
 const NODE_ENV = process.env.NODE_ENV || "development";
 
 const envFileMap: Record<string, string> = {
@@ -63,7 +62,3 @@ const env = {
 };
 
 export default Object.freeze(env);
-
-
-
-

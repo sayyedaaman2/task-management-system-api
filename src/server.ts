@@ -6,7 +6,6 @@ import logger from "@/utils/logger.js";
 
 async function startServer() {
   try {
-
     await connectDB(serverConfig.mongodbUri);
 
     app.listen(serverConfig.port, () => {
@@ -14,15 +13,14 @@ async function startServer() {
         `Server is running on port ${serverConfig.port} in ${serverConfig.nodeEnv} mode.`
       );
     });
-    
-  }catch (err) {
-  if (err instanceof Error) {
-    logger.error(`Error starting server: ${err.message}`);
-  } else {
-    logger.error("Unknown error starting server");
-  }
+  } catch (err) {
+    if (err instanceof Error) {
+      logger.error(`Error starting server: ${err.message}`);
+    } else {
+      logger.error("Unknown error starting server");
+    }
 
-  throw err;
-}
+    throw err;
+  }
 }
 void startServer();
