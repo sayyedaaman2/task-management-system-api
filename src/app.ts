@@ -6,6 +6,7 @@ import { corsMiddleware } from "@/middleware/cors.middleware.js";
 import { globalErrorHandler } from "@/middleware/error.middleware.js";
 import { helmetMiddleware } from "@/middleware/helmet.middleware.js";
 import { requestLogger } from "@/middleware/logger.middleware.js";
+import { rateLimitMiddleware } from "@/middleware/ratelimit.middleware.js";
 import { notFound } from "@/middleware/notfound.middleware.js";
 
 // Create an instance of the Express application
@@ -17,11 +18,8 @@ const app: Express = express();
 
 // Security middleware
 app.use(helmetMiddleware);
-// Request logging middleware
-app.use(requestLogger);
 
-//middleware to parse JSON bodies
-app.use(express.json());
+
 
 //cors middleware
 const corsOptions = {
@@ -33,6 +31,16 @@ const corsOptions = {
 };
 app.use(corsMiddleware(corsOptions));
 
+//middleware to parse JSON bodies
+app.use(express.json());
+
+// Request logging middleware
+app.use(requestLogger);
+
+// Rate limiting middleware
+app.use(rateLimitMiddleware);
+
+// Define a simple route for testing
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello, World!");
 });
