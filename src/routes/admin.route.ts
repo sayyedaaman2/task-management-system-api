@@ -1,8 +1,11 @@
 import {Router} from "express";
 
+
+import analyticRoutes from './analytics.route.js'
+
 import * as adminController from "@/controller/admin.controller.js";
 
-import analyticRoutes from './analytics.js'
+
 const router = Router();
 
 router.get("/users", adminController.getAllUsers);
