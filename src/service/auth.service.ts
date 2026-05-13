@@ -22,7 +22,7 @@ class AuthService {
       password: hashedPassword,
     });
 
-    return await newUser.save().lean();
+    return await newUser.save();
   }
 
   async login(email: string, password: string): Promise<IUserDocument> {
@@ -40,6 +40,10 @@ class AuthService {
 
     return user;
   }
+
+  async getProfile(userId: string){
+        return await UserModel.findById(userId).select("-password");
+    }
 }
 
 export default new AuthService();
