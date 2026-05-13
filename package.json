@@ -6,8 +6,8 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "ts-node src/server.ts",
-    "build": "tsc",
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc && tsc-alias",
     "start": "node dist/server.js",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -31,8 +31,12 @@
     "eslint-plugin-security": "^4.0.0",
     "globals": "^17.6.0",
     "prettier": "3.8.3",
-    "ts-node": "^10.9.2",
+    "tsc-alias": "^1.8.17",
+    "tsx": "^4.21.0",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.59.3"
+  },
+  "dependencies": {
+    "tsconfig-paths": "^4.2.0"
   }
 }
