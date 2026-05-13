@@ -1,6 +1,6 @@
 import TaskModel, { type ITask } from "@/model/task.model.js";
 import UserModel from "@/model/user.model.js";
-import {AppError} from "@/utils/error.js";
+import { AppError } from "@/utils/error.js";
 interface QueryParams {
   page?: number;
   limit?: number;
@@ -16,13 +16,13 @@ class TaskService {
     // check assigning user is exist or not will be done in controller layer
     const assignedToUser = await UserModel.findById(taskData.assignedTo);
     if (!assignedToUser) {
-      throw new AppError("assignedTo not found",404);
+      throw new AppError("assignedTo not found", 404);
     }
     const task = new TaskModel(taskData);
     return await task.save();
   }
 
-  async getAllTasks(query: QueryParams) {
+  async getAllTasks(userId: string, query: QueryParams) {
     const {
       page = 1,
       limit = 10,
@@ -45,7 +45,9 @@ class TaskService {
       priority?: string;
     }
     // filter object
-    const filters: ITaskFilters = {};
+    const filters: ITaskFilters = {
+      assignedTo: userId,
+    };
 
     // search by title
     if (search) {
@@ -91,16 +93,56 @@ class TaskService {
     };
   }
 
-  async getTaskById(taskId: string) {
-    return await TaskModel.findById(taskId).populate("assignedTo", "name email");
+  async getTaskById(taskId: string, userId: string) {
+    const task = await TaskModel.findOne({
+      _id: taskId,
+      assignedTo: userId,
+    }).populate("assignedTo", "name email");
+
+    if (!task) {
+      throw new AppError("Task not found", 404);
+    }
+
+    return task;
+  }
+async updateTask(
+  taskId: string,
+  userId: string,
+  taskData: Partial<ITask>
+) {
+
+  const task = await TaskModel.findOneAndUpdate(
+    {
+      _id: taskId,
+      assignedTo: userId,
+    },
+    taskData,
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  if (!task) {
+    throw new AppError(
+      "Task not found or unauthorized",
+      404
+    );
   }
 
-  async updateTask(taskId: string, taskData: Partial<ITask>) {
-    return await TaskModel.findByIdAndUpdate(taskId, taskData, { new: true });
-  }
+  return task;
+}
+  async deleteTask(taskId: string, userId: string) {
+    const task = await TaskModel.findOneAndDelete({
+      _id: taskId,
+      assignedTo: userId,
+    });
 
-  async deleteTask(taskId: string) {
-    return await TaskModel.findByIdAndDelete(taskId);
+    if (!task) {
+      throw new AppError("Task not found or unauthorized", 404);
+    }
+
+    return task;
   }
 }
 
