@@ -18,7 +18,7 @@ export default defineConfig([
   {
     files: ["**/*.{js,mjs,cjs,ts,mts,cts}"],
 
-      ignores: ["dist/**", "node_modules/**", "coverage/**", "src/__tests__/**", "jest.config.ts"],    plugins: {
+      ignores: ["dist/**", "node_modules/**", "coverage/**", "src/__tests__/**", "jest.config.cjs"],    plugins: {
       import: importPlugin,
       promise: promisePlugin,
       security: securityPlugin,
