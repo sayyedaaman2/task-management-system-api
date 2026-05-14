@@ -1,9 +1,13 @@
+import type { SortOrder } from "mongoose";
+
 import TaskModel, { type ITask } from "@/model/task.model.js";
 import UserModel from "@/model/user.model.js";
 import { AppError } from "@/utils/error.js";
+import { convertObjectId, isValidObjectId } from "@/utils/mongoose.util.js";
+
 interface QueryParams {
-  page?: number;
-  limit?: number;
+  page?: string;
+  limit?: string;
   search?: string;
   status?: string;
   priority?: string;
@@ -11,6 +15,18 @@ interface QueryParams {
   order?: "asc" | "desc";
 }
 
+interface ITaskFilters {
+  assignedTo: string;
+
+  title?: {
+    $regex: string;
+    $options: string;
+  };
+
+  status?: string;
+
+  priority?: string;
+}
 class TaskService {
   async createTask(taskData: ITask) {
     // check assigning user is exist or not will be done in controller layer
@@ -24,8 +40,8 @@ class TaskService {
 
   async getAllTasks(userId: string, query: QueryParams) {
     const {
-      page = 1,
-      limit = 10,
+      page = "1",
+      limit = "10",
       search = "",
       status,
       priority,
@@ -33,23 +49,16 @@ class TaskService {
       order = "desc",
     } = query;
 
-    // pagination
-    const skip = (Number(page) - 1) * Number(limit);
+    const parsedPage = Math.max(1, Number(page));
 
-    interface ITaskFilters {
-      title?: {
-        $regex: string;
-        $options: string;
-      };
-      status?: string;
-      priority?: string;
-    }
-    // filter object
+    const parsedLimit = Math.min(100, Math.max(1, Number(limit)));
+
+    const skip = (parsedPage - 1) * parsedLimit;
+
     const filters: ITaskFilters = {
       assignedTo: userId,
     };
 
-    // search by title
     if (search) {
       filters.title = {
         $regex: search,
@@ -57,46 +66,51 @@ class TaskService {
       };
     }
 
-    // filter by status
     if (status) {
       filters.status = status;
     }
 
-    // filter by priority
     if (priority) {
       filters.priority = priority;
     }
-    type SortOptions = {
-      [key: string]: number;
-    };
-    // sorting
-    const sortOptions: SortOptions = {
-      [sortBy]: order === "asc" ? 1 : -1,
+
+    const allowedSortFields = ["createdAt", "title", "priority", "dueDate", "status"];
+
+    const finalSortBy = allowedSortFields.includes(sortBy) ? sortBy : "createdAt";
+
+    const sortOptions: Record<string, SortOrder> = {
+      [finalSortBy]: order === "asc" ? 1 : -1,
     };
 
-    // query
     const tasks = await TaskModel.find(filters)
       .populate("assignedTo", "name email")
       .sort(sortOptions)
       .skip(skip)
-      .limit(Number(limit));
+      .limit(parsedLimit)
+      .lean();
 
-    // total count
     const total = await TaskModel.countDocuments(filters);
 
     return {
       total,
-      page: Number(page),
-      limit: Number(limit),
-      totalPages: Math.ceil(total / Number(limit)),
+      page: parsedPage,
+      limit: parsedLimit,
+      totalPages: Math.ceil(total / parsedLimit),
       data: tasks,
     };
   }
 
   async getTaskById(taskId: string, userId: string) {
+    if (!isValidObjectId(taskId)) {
+      throw new AppError("Invalid task id", 400);
+    }
+
+    if (!isValidObjectId(userId)) {
+      throw new AppError("Invalid user id", 400);
+    }
+
     const task = await TaskModel.findOne({
-      _id: taskId,
-      assignedTo: userId,
+      _id: convertObjectId(taskId),
     }).populate("assignedTo", "name email");
 
     if (!task) {
@@ -105,33 +119,25 @@ class TaskService {
 
     return task;
   }
-async updateTask(
-  taskId: string,
-  userId: string,
-  taskData: Partial<ITask>
-) {
-
-  const task = await TaskModel.findOneAndUpdate(
-    {
-      _id: taskId,
-      assignedTo: userId,
-    },
-    taskData,
-    {
-      new: true,
-      runValidators: true,
-    }
-  );
-
-  if (!task) {
-    throw new AppError(
-      "Task not found or unauthorized",
-      404
+  async updateTask(taskId: string, userId: string, taskData: Partial<ITask>) {
+    const task = await TaskModel.findOneAndUpdate(
+      {
+        _id: taskId,
+        assignedTo: userId,
+      },
+      taskData,
+      {
+        new: true,
+        runValidators: true,
+      }
     );
-  }
 
-  return task;
-}
+    if (!task) {
+      throw new AppError("Task not found or unauthorized", 404);
+    }
+
+    return task;
+  }
   async deleteTask(taskId: string, userId: string) {
     const task = await TaskModel.findOneAndDelete({
       _id: taskId,
