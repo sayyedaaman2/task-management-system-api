@@ -40,6 +40,10 @@ class AuthService {
       throw new AppError("Invalid password", 400);
     }
 
+    user.lastLogin = new Date();
+
+    await user.save();
+
     return user;
   }
 
