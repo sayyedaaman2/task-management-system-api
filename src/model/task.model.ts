@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import type { Model } from "mongoose";
 
 import { TaskStatus, TaskPriority } from "@/utils/constant.js";
 
@@ -7,11 +8,12 @@ export interface ITask {
   description: string;
   status: string;
   dueDate: Date;
+  priority: string;
   assignedTo: mongoose.Types.ObjectId;
 }
 
 export interface ITaskDocument extends ITask, mongoose.Document {}
-const taskSchema = new mongoose.Schema(
+const taskSchema = new mongoose.Schema<ITaskDocument>(
   {
     title: {
       type: String,
@@ -43,6 +45,6 @@ const taskSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Task = mongoose.models.tasks || mongoose.model<ITask>("Task", taskSchema);
-
+const Task: Model<ITaskDocument> =
+  mongoose.models.Task || mongoose.model<ITaskDocument>("Task", taskSchema);
 export default Task;

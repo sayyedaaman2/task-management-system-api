@@ -2,18 +2,26 @@ import type { Request, Response, NextFunction } from "express";
 
 import type { ITask } from "@/model/task.model.js";
 import taskService from "@/service/task.service.js";
-
+import { AppError } from "@/utils/error.js";
+import { convertObjectId } from "@/utils/mongoose.util.js";
+interface TaskParams {
+  id?: string;
+}
 export const createTask = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    if (!req.user) {
+      return next(new AppError("Unauthorized", 401));
+    }
     const userId = req.user?.userId;
-    const { title, description, dueDate, status }: ITask = req.body;
+    const { title, description, dueDate, status, priority }: ITask = req.body;
 
     const payload = {
       title,
       description,
       dueDate,
+      priority,
       status,
-      assignedTo: userId,
+      assignedTo: convertObjectId(userId),
     };
     const task = await taskService.createTask(payload);
     res.status(201).json(task);
@@ -24,6 +32,9 @@ export const createTask = async (req: Request, res: Response, next: NextFunction
 
 export const getAllTasks = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    if (!req.user) {
+      return next(new AppError("Unauthorized", 401));
+    }
     const userId = req.user.userId;
     const tasks = await taskService.getAllTasks(userId, req.query);
     res.status(200).json(tasks);
@@ -32,11 +43,19 @@ export const getAllTasks = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
-export const getTaskById = async (req: Request, res: Response, next: NextFunction) => {
+export const getTaskById = async (req: Request<TaskParams>, res: Response, next: NextFunction) => {
   try {
-    const userId = req.user.userId;
+    if (!req?.params?.id) {
+      return next(new AppError("id is not defined", 401));
+    }
 
-    const task = await taskService.getTaskById(req.params.id, userId);
+    if (!req.user) {
+      return next(new AppError("Unauthorized", 401));
+    }
+    const userId = req.user.userId;
+    const id = req.params.id;
+
+    const task = await taskService.getTaskById(id, userId);
     if (!task) {
       return res.status(404).json({ message: "Task not found" });
     }
@@ -46,10 +65,17 @@ export const getTaskById = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
-export const updateTask = async (req: Request, res: Response, next: NextFunction) => {
+export const updateTask = async (req: Request<TaskParams>, res: Response, next: NextFunction) => {
   try {
+    if (!req.user) {
+      return next(new AppError("Unauthorized", 401));
+    }
+    if (!req.params.id) {
+      return next(new AppError("Task id is required", 400));
+    }
     const userId = req.user.userId;
-    const task = await taskService.updateTask(req.params.id, userId, req.body);
+    const id = req.params.id;
+    const task = await taskService.updateTask(id, userId, req.body);
     if (!task) {
       return res.status(404).json({ message: "Task not found" });
     }
@@ -59,8 +85,14 @@ export const updateTask = async (req: Request, res: Response, next: NextFunction
   }
 };
 
-export const deleteTask = async (req: Request, res: Response, next: NextFunction) => {
+export const deleteTask = async (req: Request<TaskParams>, res: Response, next: NextFunction) => {
   try {
+    if (!req.user) {
+      return next(new AppError("Unauthorized", 401));
+    }
+    if (!req.params.id) {
+      return next(new AppError("Task id is required", 400));
+    }
     const userId = req.user.userId;
     const task = await taskService.deleteTask(req.params.id, userId);
     if (!task) {

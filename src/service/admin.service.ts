@@ -1,40 +1,34 @@
 import type { SortOrder } from "mongoose";
 
 import TaskModel from "@/model/task.model.js";
+import type { ITaskDocument } from "@/model/task.model.js";
 import UserModel from "@/model/user.model.js";
 import type { IUserDocument } from "@/model/user.model.js";
-import { TaskStatus } from "@/utils/constant.js";
 import { AppError } from "@/utils/error.js";
 
-interface GetUsersQuery {
-  page?: string;
-  limit?: string;
-  search?: string;
-  userStatus?: string;
-  userType?: string;
-  sortBy?: string;
-  order?: "asc" | "desc";
-}
-interface GetTasksByUserQuery {
-  page?: string;
-  limit?: string;
-  search?: string;
-  status?: string;
-  priority?: string;
-  sortBy?: string;
-  order?: "asc" | "desc";
+import { UserTypes, UserStatus, TaskStatus } from "@/utils/constant.js";
+
+interface UserFilters {
+  $or?: Array<{
+    name?: {
+      $regex: string;
+      $options: string;
+    };
+
+    email?: {
+      $regex: string;
+      $options: string;
+    };
+  }>;
+
+  userStatus?: (typeof UserStatus.values)[number];
+
+  userType?: (typeof UserTypes.values)[number];
 }
 
-interface QueryParams {
-  page?: string;
-  limit?: string;
-  search?: string;
-  status?: string;
-  priority?: string;
-  sortBy?: string;
-  order?: "asc" | "desc";
-}
-interface ITaskFilters {
+interface TaskFilters {
+  assignedTo?: string;
+
   title?: {
     $regex: string;
     $options: string;
@@ -43,9 +37,42 @@ interface ITaskFilters {
   status?: string;
 
   priority?: string;
+
+  dueDate?: {
+    $lt?: Date;
+  };
 }
+/**
+ * SHARED INTERFACES
+ */
+interface BaseQuery {
+  page?: string;
+  limit?: string;
+  search?: string;
+  sortBy?: string;
+  order?: "asc" | "desc";
+}
+
+interface GetUsersQuery extends BaseQuery {
+  userStatus?: string;
+  userType?: string;
+}
+
+interface GetTasksQuery extends BaseQuery {
+  status?: string;
+  priority?: string;
+}
+
+interface PaginatedResponse<T> {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  data: T[];
+}
+
 class AdminService {
-  async getAllUsers(query: GetUsersQuery) {
+  async getAllUsers(query: GetUsersQuery): Promise<PaginatedResponse<IUserDocument>> {
     const {
       page = "1",
       limit = "10",
@@ -56,77 +83,75 @@ class AdminService {
       order = "desc",
     } = query;
 
-    // pagination
-    const skip = (Number(page) - 1) * Number(limit);
+    const parsedPage = Math.max(1, Number(page));
+    const parsedLimit = Math.min(100, Math.max(1, Number(limit)));
+    const skip = (parsedPage - 1) * parsedLimit;
 
-    // filters
-    const filters: any = {};
+    // Use FilterQuery from Mongoose
+    const filters: UserFilters = {};
 
-    // search by name/email
     if (search) {
       filters.$or = [
-        {
-          name: {
-            $regex: search,
-            $options: "i",
-          },
-        },
-        {
-          email: {
-            $regex: search,
-            $options: "i",
-          },
-        },
+        { name: { $regex: search, $options: "i" } },
+        { email: { $regex: search, $options: "i" } },
       ];
     }
 
-    // filter by status
-    if (userStatus) {
-      filters.userStatus = userStatus;
+    if (userType && !UserTypes.values.includes(userType as (typeof UserTypes.values)[number])) {
+      throw new AppError("Invalid user type", 400);
     }
 
-    // filter by type
     if (userType) {
-      filters.userType = userType;
+      filters.userType = userType as (typeof UserTypes.values)[number];
+    }
+    if (
+      userStatus &&
+      !UserStatus.values.includes(userStatus as (typeof UserStatus.values)[number])
+    ) {
+      throw new AppError("Invalid user status", 400);
     }
 
-    // allowed sort fields
-    const allowedSortFields = ["createdAt", "name", "email"];
+    if (userStatus) {
+      filters.userStatus = userStatus as (typeof UserStatus.values)[number];
+    }
 
+    const allowedSortFields = ["createdAt", "name", "email"];
     const finalSortBy = allowedSortFields.includes(sortBy) ? sortBy : "createdAt";
 
-    // sorting
-    const sortOptions = {
+    const sortOptions: Record<string, SortOrder> = {
       [finalSortBy]: order === "asc" ? 1 : -1,
     };
 
-    // query users
     const users = await UserModel.find(filters)
       .select("-password")
       .sort(sortOptions)
       .skip(skip)
-      .limit(Number(limit))
+      .limit(parsedLimit)
       .lean();
 
-    // total count
     const total = await UserModel.countDocuments(filters);
 
     return {
       total,
-      page: Number(page),
-      limit: Number(limit),
-      totalPages: Math.ceil(total / Number(limit)),
+      page: parsedPage,
+      limit: parsedLimit,
+      totalPages: Math.ceil(total / parsedLimit),
       data: users,
     };
   }
-  async deleteUser(id: string): Promise<IUserDocument> {
+
+  async deleteUser(id: string): Promise<IUserDocument | null> {
     const deletedUser = await UserModel.findByIdAndDelete(id);
     if (!deletedUser) {
       throw new AppError("User not found", 404);
     }
     return deletedUser;
   }
-  async getAllTasksByUser(userId: string, query: GetTasksByUserQuery) {
+
+  async getAllTasksByUser(
+    userId: string,
+    query: GetTasksQuery
+  ): Promise<PaginatedResponse<ITaskDocument>> {
     const {
       page = "1",
       limit = "10",
@@ -137,128 +162,26 @@ class AdminService {
       order = "desc",
     } = query;
 
-    // pagination
-    const skip = (Number(page) - 1) * Number(limit);
-
-    // filters
-    const filters: any = {
-      assignedTo: userId,
-    };
-
-    // search by title
-    if (search) {
-      filters.title = {
-        $regex: search,
-        $options: "i",
-      };
-    }
-
-    // filter by status
-    if (status) {
-      filters.status = status;
-    }
-
-    // filter by priority
-    if (priority) {
-      filters.priority = priority;
-    }
-
-    // allowed sorting fields
-    const allowedSortFields = ["createdAt", "title", "dueDate", "priority", "status"];
-
-    const finalSortBy = allowedSortFields.includes(sortBy) ? sortBy : "createdAt";
-
-    // sorting
-    const sortOptions = {
-      [finalSortBy]: order === "asc" ? 1 : -1,
-    };
-
-    // query
-    const tasks = await TaskModel.find(filters)
-      .populate("assignedTo", "name email")
-      .sort(sortOptions)
-      .skip(skip)
-      .limit(Number(limit))
-      .lean();
-
-    // total
-    const total = await TaskModel.countDocuments(filters);
-
-    return {
-      total,
-      page: Number(page),
-      limit: Number(limit),
-      totalPages: Math.ceil(total / Number(limit)),
-      data: tasks,
-    };
-  }
-
-  async getAllTasks(query: QueryParams) {
-    const {
-      page = "1",
-      limit = "10",
-      search = "",
-      status,
-      priority,
-      sortBy = "createdAt",
-      order = "desc",
-    } = query;
-
-    /**
-     * Pagination
-     */
     const parsedPage = Math.max(1, Number(page));
-
     const parsedLimit = Math.min(100, Math.max(1, Number(limit)));
-
     const skip = (parsedPage - 1) * parsedLimit;
 
-    /**
-     * Filters
-     */
-    const filters: ITaskFilters = {};
+    const filters: TaskFilters = { assignedTo: userId };
 
-    /**
-     * Search
-     */
     if (search) {
-      filters.title = {
-        $regex: search,
-        $options: "i",
-      };
+      filters.title = { $regex: search, $options: "i" };
     }
 
-    /**
-     * Filter by status
-     */
-    if (status) {
-      filters.status = status;
-    }
+    if (status) filters.status = status;
+    if (priority) filters.priority = priority;
 
-    /**
-     * Filter by priority
-     */
-    if (priority) {
-      filters.priority = priority;
-    }
-
-    /**
-     * Allowed sorting
-     */
-    const allowedSortFields = ["createdAt", "title", "priority", "dueDate", "status"];
-
+    const allowedSortFields = ["createdAt", "title", "dueDate", "priority", "status"];
     const finalSortBy = allowedSortFields.includes(sortBy) ? sortBy : "createdAt";
 
-    /**
-     * Sorting
-     */
     const sortOptions: Record<string, SortOrder> = {
       [finalSortBy]: order === "asc" ? 1 : -1,
     };
 
-    /**
-     * Query
-     */
     const tasks = await TaskModel.find(filters)
       .populate("assignedTo", "name email")
       .sort(sortOptions)
@@ -266,9 +189,6 @@ class AdminService {
       .limit(parsedLimit)
       .lean();
 
-    /**
-     * Total count
-     */
     const total = await TaskModel.countDocuments(filters);
 
     return {
@@ -280,66 +200,94 @@ class AdminService {
     };
   }
 
-  async deleteTask(id: string): Promise<`ITaskDocument`> {
-    const deletedUser = await UserModel.findByIdAndDelete(id);
-    if (!deletedUser) {
-      throw new AppError("User not found", 404);
+  async getAllTasks(query: GetTasksQuery): Promise<PaginatedResponse<ITaskDocument>> {
+    const {
+      page = "1",
+      limit = "10",
+      search = "",
+      status,
+      priority,
+      sortBy = "createdAt",
+      order = "desc",
+    } = query;
+
+    const parsedPage = Math.max(1, Number(page));
+    const parsedLimit = Math.min(100, Math.max(1, Number(limit)));
+    const skip = (parsedPage - 1) * parsedLimit;
+
+    const filters: TaskFilters = {};
+
+    if (search) {
+      filters.title = { $regex: search, $options: "i" };
     }
-    return deletedUser;
+
+    if (status) filters.status = status;
+    if (priority) filters.priority = priority;
+
+    const allowedSortFields = ["createdAt", "title", "priority", "dueDate", "status"];
+    const finalSortBy = allowedSortFields.includes(sortBy) ? sortBy : "createdAt";
+
+    const sortOptions: Record<string, SortOrder> = {
+      [finalSortBy]: order === "asc" ? 1 : -1,
+    };
+
+    const tasks = await TaskModel.find(filters)
+      .populate("assignedTo", "name email")
+      .sort(sortOptions)
+      .skip(skip)
+      .limit(parsedLimit)
+      .lean();
+
+    const total = await TaskModel.countDocuments(filters);
+
+    return {
+      total,
+      page: parsedPage,
+      limit: parsedLimit,
+      totalPages: Math.ceil(total / parsedLimit),
+      data: tasks,
+    };
+  }
+
+  async deleteTask(id: string): Promise<ITaskDocument> {
+    const deletedTask = await TaskModel.findByIdAndDelete(id);
+    if (!deletedTask) {
+      throw new AppError("Task not found", 404);
+    }
+    return deletedTask;
   }
 
   async analyzeUserActivity(userId: string) {
     const totalTasks = await TaskModel.countDocuments({ assignedTo: userId });
     const completedTasks = await TaskModel.countDocuments({
       assignedTo: userId,
-      status: "completed",
+      status: TaskStatus.COMPLETED, // Use Constant
     });
-    const pendingTasks = await TaskModel.countDocuments({ assignedTo: userId, status: "pending" });
+    const pendingTasks = await TaskModel.countDocuments({
+      assignedTo: userId,
+      status: TaskStatus.PENDING,
+    });
     const overdueTasks = await TaskModel.countDocuments({
       assignedTo: userId,
       dueDate: { $lt: new Date() },
-      status: { $ne: "completed" },
+      status: { $ne: TaskStatus.COMPLETED },
     });
 
-    return {
-      totalTasks,
-      completedTasks,
-      pendingTasks,
-      overdueTasks,
-    };
+    return { totalTasks, completedTasks, pendingTasks, overdueTasks };
   }
+
   async analyzeSystemUsage() {
-    // date for active users
     const last30Days = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
-    // run queries in parallel
     const [totalUsers, activeUsers, totalTasks, completedTasks, pendingTasks] = await Promise.all([
       UserModel.countDocuments(),
-
-      UserModel.countDocuments({
-        lastLogin: {
-          $gte: last30Days,
-        },
-      }),
-
+      UserModel.countDocuments({ lastLogin: { $gte: last30Days } }),
       TaskModel.countDocuments(),
-
-      TaskModel.countDocuments({
-        status: TaskStatus.COMPLETED,
-      }),
-
-      TaskModel.countDocuments({
-        status: TaskStatus.PENDING,
-      }),
+      TaskModel.countDocuments({ status: TaskStatus.COMPLETED }),
+      TaskModel.countDocuments({ status: TaskStatus.PENDING }),
     ]);
 
-    return {
-      totalUsers,
-      activeUsers,
-      totalTasks,
-      completedTasks,
-      pendingTasks,
-    };
+    return { totalUsers, activeUsers, totalTasks, completedTasks, pendingTasks };
   }
 }
 

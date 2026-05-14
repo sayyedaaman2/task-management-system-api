@@ -15,8 +15,17 @@ export const getAllUsers = async (req: Request, res: Response, next: NextFunctio
 export const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.params.id;
+
+    if (!userId || Array.isArray(userId)) {
+      throw new AppError("Invalid user id", 400);
+    }
+
     await adminService.deleteUser(userId);
-    res.status(200).json({ message: "User deleted successfully" });
+
+    res.status(200).json({
+      success: true,
+      message: "User deleted successfully",
+    });
   } catch (error) {
     next(error instanceof AppError ? error : new AppError("Failed to delete user", 500));
   }
@@ -25,6 +34,9 @@ export const deleteUser = async (req: Request, res: Response, next: NextFunction
 export const getAllTasksByUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.params.id;
+    if (!userId || Array.isArray(userId)) {
+      throw new AppError("Invalid user id", 400);
+    }
     const tasks = await adminService.getAllTasksByUser(userId, req.query);
     res.status(200).json(tasks);
   } catch (error) {
@@ -43,6 +55,9 @@ export const getAllTasks = async (req: Request, res: Response, next: NextFunctio
 export const deleteTask = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const taskId = req.params.id;
+    if (!taskId || Array.isArray(taskId)) {
+      throw new AppError("Invalid user id", 400);
+    }
     await adminService.deleteTask(taskId);
     res.status(200).json({ message: "Task deleted successfully" });
   } catch (error) {
@@ -53,6 +68,9 @@ export const deleteTask = async (req: Request, res: Response, next: NextFunction
 export const getUserActivity = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.params.id;
+    if (!userId || Array.isArray(userId)) {
+      throw new AppError("Invalid user id", 400);
+    }
     const data = await adminService.analyzeUserActivity(userId);
     res.status(200).json({ message: "Successfully Fetched User Activities", data });
   } catch (error) {

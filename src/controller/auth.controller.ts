@@ -97,19 +97,24 @@ export const refreshToken = async (req: Request, res: Response, next: NextFuncti
   }
 };
 
-
-
-
 export const getProfile = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const userId = req.user?.userId;
-     
-        const profile = await authService.getProfile(userId);
-        if (!profile) {
-            throw new AppError("User not found",404);
-        }
-        res.status(200).json(profile);
-    } catch (error) {
-        next(error);
+  try {
+
+    if (!req.user) {
+      return next(
+        new AppError(
+          "Unauthorized",
+          401
+        )
+      );
     }
-}
+    const userId = req.user?.userId;
+    const profile = await authService.getProfile(userId);
+    if (!profile) {
+      throw new AppError("User not found", 404);
+    }
+    res.status(200).json(profile);
+  } catch (error) {
+    next(error);
+  }
+};
