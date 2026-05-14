@@ -11,22 +11,20 @@ const envFileMap: Record<string, string> = {
 };
 
 const envFile = envFileMap[NODE_ENV] || ".env";
-const envPath = path.resolve(process.cwd(), envFile);
 
 dotenv.config({
-  path: envPath,
+  path: path.resolve(process.cwd(), envFile),
 });
 
 /**
- * 1. Add REDIS_URL to the required list so the app fails early 
- * if it is missing (just like MONGODB_URI).
+ * Validate required envs
  */
 const requiredEnvVariables = [
   "PORT",
   "MONGODB_URI",
   "REDIS_HOST",
   "REDIS_PORT",
-  "REDIS_PASSWORD",
+  "REDIS_TTL",
   "JWT_SECRET",
   "JWT_EXPIRES_IN",
   "JWT_REFRESH_SECRET",
@@ -34,36 +32,76 @@ const requiredEnvVariables = [
 ] as const;
 
 for (const envVariable of requiredEnvVariables) {
-  if (!process.env[envVariable]) {
-    throw new Error(`Missing required environment variable: ${envVariable}`);
+  if (process.env[envVariable] === undefined) {
+    throw new Error(
+      `Missing required environment variable: ${envVariable}`
+    );
   }
 }
 
+/**
+ * Safe number parser
+ */
+const parseNumber = (
+  value: string | undefined,
+  name: string
+): number => {
+  const parsed = Number(value);
+
+  if (Number.isNaN(parsed)) {
+    throw new Error(
+      `Invalid numeric env variable: ${name}`
+    );
+  }
+
+  return parsed;
+};
+
 const env = {
   nodeEnv: NODE_ENV,
+
   isDevelopment: NODE_ENV === "development",
   isProduction: NODE_ENV === "production",
   isTest: NODE_ENV === "test",
 
-  port: Number(process.env.PORT),
-  mongodbUri: process.env.MONGODB_URI as string,
-  
-  /**
-   * 2. Ensure redisUrl is cast as string and validated
-   */
-  redis: {
-    host: process.env.REDIS_HOST as string,
-    port: Number(process.env.REDIS_PORT),
-    username: process.env.REDIS_USERNAME || 'default',
-    password: process.env.REDIS_PASSWORD as string,
-  },
-  jwtSecret: process.env.JWT_SECRET as string,
-  jwtExpiresIn: process.env.JWT_EXPIRES_IN as string,
-  jwtRefreshSecret: process.env.JWT_REFRESH_SECRET as string,
-  jwtRefreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN as string,
+  port: parseNumber(process.env.PORT, "PORT"),
 
-  bcryptSaltRounds: Number(process.env.BCRYPT_SALT_ROUNDS || 10),
+  mongodbUri: process.env.MONGODB_URI!,
+
+  redis: {
+    host: process.env.REDIS_HOST!,
+
+    port: parseNumber(
+      process.env.REDIS_PORT,
+      "REDIS_PORT"
+    ),
+
+    username: process.env.REDIS_USERNAME,
+
+    password: process.env.REDIS_PASSWORD,
+
+    ttl: parseNumber(
+      process.env.REDIS_TTL,
+      "REDIS_TTL"
+    ),
+  },
+
+  jwtSecret: process.env.JWT_SECRET!,
+  jwtExpiresIn: process.env.JWT_EXPIRES_IN!,
+
+  jwtRefreshSecret:
+    process.env.JWT_REFRESH_SECRET!,
+
+  jwtRefreshExpiresIn:
+    process.env.JWT_REFRESH_EXPIRES_IN!,
+
+  bcryptSaltRounds: parseNumber(
+    process.env.BCRYPT_SALT_ROUNDS || "10",
+    "BCRYPT_SALT_ROUNDS"
+  ),
+
   corsOrigin: process.env.CORS_ORIGIN || "*",
+
   logLevel: process.env.LOG_LEVEL || "info",
 };
 
