@@ -29,11 +29,18 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Prettier
+        run: npm run format
+
       - name: Run linter
         run: npm run lint
 
+      - name: Built App
+        run: npm run build
+
       - name: Run tests with coverage
         run: npm test -- --coverage --coverageThreshold='{"global":{"lines":80,"functions":80,"branches":60,"statements":80}}'
+
         env:
           NODE_ENV: test
           PORT: 3000
