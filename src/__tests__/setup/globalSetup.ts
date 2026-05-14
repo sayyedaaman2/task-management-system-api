@@ -1,0 +1,10 @@
+process.env.NODE_ENV = "test";
+process.env.PORT = "3000";
+process.env.MONGODB_URI = "mongodb://localhost:27017/test";
+process.env.JWT_SECRET = "test_jwt_secret";
+process.env.JWT_EXPIRES_IN = "1h";
+process.env.JWT_REFRESH_SECRET = "test_jwt_refresh_secret";
+process.env.JWT_REFRESH_EXPIRES_IN = "7d";
+process.env.REDIS_HOST = "127.0.0.1";
+process.env.REDIS_PORT = "6379";
+process.env.REDIS_TTL = "300";
