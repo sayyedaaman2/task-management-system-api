@@ -4,6 +4,7 @@ import type { ITask } from "@/model/task.model.js";
 import taskService from "@/service/task.service.js";
 import { AppError } from "@/utils/error.js";
 import { convertObjectId } from "@/utils/mongoose.util.js";
+import { clearCache } from "@/utils/cache.util.js";
 interface TaskParams {
   id?: string;
 }
@@ -24,6 +25,8 @@ export const createTask = async (req: Request, res: Response, next: NextFunction
       assignedTo: convertObjectId(userId),
     };
     const task = await taskService.createTask(payload);
+    await clearCache(["tasks"], req.user?.id);
+
     res.status(201).json(task);
   } catch (error) {
     next(error);
@@ -79,6 +82,8 @@ export const updateTask = async (req: Request<TaskParams>, res: Response, next: 
     if (!task) {
       return res.status(404).json({ message: "Task not found" });
     }
+    await clearCache(["tasks"], req.user?.id);
+
     res.status(200).json(task);
   } catch (error) {
     next(error);
@@ -98,6 +103,8 @@ export const deleteTask = async (req: Request<TaskParams>, res: Response, next: 
     if (!task) {
       return res.status(404).json({ message: "Task not found" });
     }
+    await clearCache(["tasks"], req.user?.id);
+
     res.status(200).json({ message: "Task deleted successfully" });
   } catch (error) {
     next(error);

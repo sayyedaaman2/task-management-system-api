@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 
 import adminService from "@/service/admin.service.js";
 import { AppError } from "@/utils/error.js";
+import { clearCache } from "@/utils/cache.util.js";
 
 export const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -21,6 +22,7 @@ export const deleteUser = async (req: Request, res: Response, next: NextFunction
     }
 
     await adminService.deleteUser(userId);
+    await clearCache(["users"], req.user?.id);
 
     res.status(200).json({
       success: true,
@@ -59,6 +61,8 @@ export const deleteTask = async (req: Request, res: Response, next: NextFunction
       throw new AppError("Invalid user id", 400);
     }
     await adminService.deleteTask(taskId);
+    await clearCache(["tasks"], req.user?.id);
+
     res.status(200).json({ message: "Task deleted successfully" });
   } catch (error) {
     next(error instanceof AppError ? error : new AppError("Failed to delete task", 500));
