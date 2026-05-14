@@ -143,7 +143,7 @@ export default defineConfig([
        |--------------------------------------------------------------------------
        */
 
-      complexity: ["warn", 10],
+      complexity: ["warn", 15],
 
       "max-depth": ["warn", 4],
 

@@ -99,14 +99,8 @@ export const refreshToken = async (req: Request, res: Response, next: NextFuncti
 
 export const getProfile = async (req: Request, res: Response, next: NextFunction) => {
   try {
-
     if (!req.user) {
-      return next(
-        new AppError(
-          "Unauthorized",
-          401
-        )
-      );
+      return next(new AppError("Unauthorized", 401));
     }
     const userId = req.user?.userId;
     const profile = await authService.getProfile(userId);

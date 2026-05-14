@@ -4,9 +4,9 @@ import TaskModel from "@/model/task.model.js";
 import type { ITaskDocument } from "@/model/task.model.js";
 import UserModel from "@/model/user.model.js";
 import type { IUserDocument } from "@/model/user.model.js";
+import { UserTypes, UserStatus, TaskStatus } from "@/utils/constant.js";
 import { AppError } from "@/utils/error.js";
 
-import { UserTypes, UserStatus, TaskStatus } from "@/utils/constant.js";
 
 interface UserFilters {
   $or?: Array<{
