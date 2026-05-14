@@ -15,11 +15,7 @@ const { default: authService } = await import("@/service/auth.service.js");
 const { AppError } = await import("@/utils/error.js");
 
 const createUser = async () => {
-  return await authService.register(
-    "Task User",
-    `taskuser_${Date.now()}@example.com`,
-    "Test@1234"
-  );
+  return await authService.register("Task User", `taskuser_${Date.now()}@example.com`, "Test@1234");
 };
 
 const createTask = async (userId: string) => {
@@ -86,10 +82,7 @@ describe("TaskService", () => {
       const user = await createUser();
       const task = await createTask(user._id.toString());
 
-      const result = await taskService.getTaskById(
-        task._id.toString(),
-        user._id.toString()
-      );
+      const result = await taskService.getTaskById(task._id.toString(), user._id.toString());
 
       expect(result._id.toString()).toBe(task._id.toString());
     });
@@ -97,9 +90,9 @@ describe("TaskService", () => {
     it("should throw AppError for invalid task id", async () => {
       const user = await createUser();
 
-      await expect(
-        taskService.getTaskById("invalidid", user._id.toString())
-      ).rejects.toThrow(AppError);
+      await expect(taskService.getTaskById("invalidid", user._id.toString())).rejects.toThrow(
+        AppError
+      );
     });
 
     it("should throw AppError if task not found", async () => {
@@ -116,11 +109,9 @@ describe("TaskService", () => {
       const user = await createUser();
       const task = await createTask(user._id.toString());
 
-      const updated = await taskService.updateTask(
-        task._id.toString(),
-        user._id.toString(),
-        { title: "Updated Task" }
-      );
+      const updated = await taskService.updateTask(task._id.toString(), user._id.toString(), {
+        title: "Updated Task",
+      });
 
       expect(updated.title).toBe("Updated Task");
     });
@@ -129,11 +120,9 @@ describe("TaskService", () => {
       const user = await createUser();
 
       await expect(
-        taskService.updateTask(
-          "64f1a2b3c4d5e6f7a8b9c0d1",
-          user._id.toString(),
-          { title: "Updated" }
-        )
+        taskService.updateTask("64f1a2b3c4d5e6f7a8b9c0d1", user._id.toString(), {
+          title: "Updated",
+        })
       ).rejects.toThrow(AppError);
     });
   });
@@ -143,10 +132,7 @@ describe("TaskService", () => {
       const user = await createUser();
       const task = await createTask(user._id.toString());
 
-      const deleted = await taskService.deleteTask(
-        task._id.toString(),
-        user._id.toString()
-      );
+      const deleted = await taskService.deleteTask(task._id.toString(), user._id.toString());
 
       expect(deleted._id.toString()).toBe(task._id.toString());
     });

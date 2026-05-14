@@ -13,17 +13,16 @@ const config: Config = {
     "^.+\\.ts$": ["ts-jest", { useESM: true }],
   },
   setupFiles: ["<rootDir>/src/__tests__/setup/globalSetup.ts"],
-  setupFilesAfterEnv: [
-    "<rootDir>/src/__tests__/setup/jest.setup.ts",
-  ],
+  setupFilesAfterEnv: ["<rootDir>/src/__tests__/setup/jest.setup.ts"],
   testMatch: ["**/src/__tests__/unit/**/*.test.ts", "**/src/__tests__/integration/**/*.test.ts"],
   clearMocks: true,
-collectCoverageFrom: [
-  "src/**/*.ts",
-  "!src/seeders/**",
-  "!src/server.ts",
-  "!src/lib/**",
-  "!src/types/**",
-],};
+  collectCoverageFrom: [
+    "src/**/*.ts",
+    "!src/seeders/**",
+    "!src/server.ts",
+    "!src/lib/**",
+    "!src/types/**",
+  ],
+};
 
 export default config;

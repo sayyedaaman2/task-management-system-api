@@ -17,11 +17,13 @@ const { default: UserModel } = await import("@/model/user.model.js");
 const registerAndLogin = async (isAdmin = false) => {
   const email = isAdmin ? "admin@example.com" : "user@example.com";
 
-  await request(app).post("/api/v1/auth/register").send({
-    name: isAdmin ? "Admin User" : "Regular User",
-    email,
-    password: "Test@1234",
-  });
+  await request(app)
+    .post("/api/v1/auth/register")
+    .send({
+      name: isAdmin ? "Admin User" : "Regular User",
+      email,
+      password: "Test@1234",
+    });
 
   if (isAdmin) {
     await UserModel.findOneAndUpdate({ email }, { userType: "admin" });
@@ -42,7 +44,7 @@ describe("Admin Routes", () => {
     adminToken = await registerAndLogin(true);
     userToken = await registerAndLogin(false);
   });
- 
+
   describe("GET /api/v1/admin/users", () => {
     it("should return 401 if no token provided", async () => {
       const res = await request(app).get("/api/v1/admin/users");

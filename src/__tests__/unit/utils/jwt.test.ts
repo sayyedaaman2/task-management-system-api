@@ -1,6 +1,12 @@
 import { jest } from "@jest/globals";
 import { AppError } from "@/utils/error.js";
-import { generateToken, verifyToken, decodeToken, isTokenValid, refreshToken } from "@/utils/jwt.js";
+import {
+  generateToken,
+  verifyToken,
+  decodeToken,
+  isTokenValid,
+  refreshToken,
+} from "@/utils/jwt.js";
 const mockPayload = {
   userId: "64f1a2b3c4d5e6f7a8b9c0d1",
   email: "test@example.com",
@@ -8,7 +14,6 @@ const mockPayload = {
 };
 
 describe("JWT Utils", () => {
-  
   describe("generateToken", () => {
     it("should generate a valid access token", () => {
       const token = generateToken(mockPayload, false);
@@ -88,26 +93,26 @@ describe("JWT Utils", () => {
     });
   });
   describe("refreshToken", () => {
-  it("should return a new access token from valid refresh token", () => {
-    const refreshTokenStr = generateToken(mockPayload, true);
-    const newAccessToken = refreshToken(refreshTokenStr);
+    it("should return a new access token from valid refresh token", () => {
+      const refreshTokenStr = generateToken(mockPayload, true);
+      const newAccessToken = refreshToken(refreshTokenStr);
 
-    expect(typeof newAccessToken).toBe("string");
-    expect(newAccessToken.split(".").length).toBe(3);
+      expect(typeof newAccessToken).toBe("string");
+      expect(newAccessToken.split(".").length).toBe(3);
+    });
+
+    it("should throw AppError for invalid refresh token", () => {
+      expect(() => refreshToken("invalid.token.here")).toThrow(AppError);
+    });
+    it("should throw AppError when token is expired", () => {
+      const token = generateToken(mockPayload, false);
+
+      jest.useFakeTimers();
+      jest.setSystemTime(Date.now() + 1000 * 60 * 60 * 24);
+
+      expect(() => verifyToken(token, false)).toThrow(AppError);
+
+      jest.useRealTimers();
+    });
   });
-
-  it("should throw AppError for invalid refresh token", () => {
-    expect(() => refreshToken("invalid.token.here")).toThrow(AppError);
-  });
-  it("should throw AppError when token is expired", () => {
-  const token = generateToken(mockPayload, false);
-
-  jest.useFakeTimers();
-  jest.setSystemTime(Date.now() + 1000 * 60 * 60 * 24);
-
-  expect(() => verifyToken(token, false)).toThrow(AppError);
-
-  jest.useRealTimers();
-});
-});
 });

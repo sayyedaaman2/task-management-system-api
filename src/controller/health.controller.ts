@@ -3,10 +3,7 @@ import mongoose from "mongoose";
 
 import { getRedisClient } from "@/lib/redis.js";
 
-const healthCheck = async (
-  _req: Request,
-  res: Response
-) => {
+const healthCheck = async (_req: Request, res: Response) => {
   try {
     /**
      * MongoDB Status
@@ -43,13 +40,9 @@ const healthCheck = async (
       environment: process.env.NODE_ENV,
 
       services: {
-        mongodb: mongoConnected
-          ? "connected"
-          : "disconnected",
+        mongodb: mongoConnected ? "connected" : "disconnected",
 
-        redis: redisConnected
-          ? "connected"
-          : "disconnected",
+        redis: redisConnected ? "connected" : "disconnected",
       },
 
       memory: {
@@ -62,22 +55,16 @@ const healthCheck = async (
     /**
      * Determine overall status
      */
-    const isHealthy =
-      mongoConnected && redisConnected;
+    const isHealthy = mongoConnected && redisConnected;
 
-    return res
-      .status(isHealthy ? 200 : 503)
-      .json(health);
+    return res.status(isHealthy ? 200 : 503).json(health);
   } catch (error) {
     return res.status(503).json({
       success: false,
       message: "Health check failed",
-      error:
-        error instanceof Error
-          ? error.message
-          : "Unknown error",
+      error: error instanceof Error ? error.message : "Unknown error",
     });
   }
 };
 
-export default healthCheck
+export default healthCheck;

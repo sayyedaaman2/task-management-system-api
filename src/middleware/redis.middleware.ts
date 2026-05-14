@@ -40,13 +40,17 @@ export const cacheMiddleware =
         return res.status(200).json(JSON.parse(cachedData));
       }
 
-      logger.info(`CACHE MISS: ${key}  ` );
+      logger.info(`CACHE MISS: ${key}  `);
 
       const originalJson = res.json.bind(res);
 
       res.json = ((body: unknown) => {
         try {
-          void getRedisClient().setEx(key, ttl ?? Number(serverConfig.redis.ttl), JSON.stringify(body));
+          void getRedisClient().setEx(
+            key,
+            ttl ?? Number(serverConfig.redis.ttl),
+            JSON.stringify(body)
+          );
         } catch (error) {
           console.error("Redis Set Error:", error);
         }

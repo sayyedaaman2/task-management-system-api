@@ -2,9 +2,9 @@ import type { Request, Response, NextFunction } from "express";
 
 import type { ITask } from "@/model/task.model.js";
 import taskService from "@/service/task.service.js";
+import { clearCache } from "@/utils/cache.util.js";
 import { AppError } from "@/utils/error.js";
 import { convertObjectId } from "@/utils/mongoose.util.js";
-import { clearCache } from "@/utils/cache.util.js";
 interface TaskParams {
   id?: string;
 }

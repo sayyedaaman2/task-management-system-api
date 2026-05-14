@@ -7,8 +7,7 @@ export const signUpValidation = Joi.object({
 
   email: Joi.string().trim().lowercase().email().required(),
 
-  password: Joi
-    .string()
+  password: Joi.string()
     .min(8)
     .max(128)
     .pattern(new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$"))
@@ -17,13 +16,11 @@ export const signUpValidation = Joi.object({
       "string.pattern.base": "Password must contain uppercase, lowercase and number",
     }),
 
-  userType: Joi
-    .string()
+  userType: Joi.string()
     .valid(...UserTypes.values)
     .default(UserTypes.USER),
 
-  userStatus: Joi
-    .string()
+  userStatus: Joi.string()
     .valid(...UserStatus.values)
     .default(UserStatus.ACTIVE),
 });

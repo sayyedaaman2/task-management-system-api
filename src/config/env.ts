@@ -33,25 +33,18 @@ const requiredEnvVariables = [
 
 for (const envVariable of requiredEnvVariables) {
   if (process.env[envVariable] === undefined) {
-    throw new Error(
-      `Missing required environment variable: ${envVariable}`
-    );
+    throw new Error(`Missing required environment variable: ${envVariable}`);
   }
 }
 
 /**
  * Safe number parser
  */
-const parseNumber = (
-  value: string | undefined,
-  name: string
-): number => {
+const parseNumber = (value: string | undefined, name: string): number => {
   const parsed = Number(value);
 
   if (Number.isNaN(parsed)) {
-    throw new Error(
-      `Invalid numeric env variable: ${name}`
-    );
+    throw new Error(`Invalid numeric env variable: ${name}`);
   }
 
   return parsed;
@@ -71,34 +64,23 @@ const env = {
   redis: {
     host: process.env.REDIS_HOST!,
 
-    port: parseNumber(
-      process.env.REDIS_PORT,
-      "REDIS_PORT"
-    ),
+    port: parseNumber(process.env.REDIS_PORT, "REDIS_PORT"),
 
     username: process.env.REDIS_USERNAME,
 
     password: process.env.REDIS_PASSWORD,
 
-    ttl: parseNumber(
-      process.env.REDIS_TTL,
-      "REDIS_TTL"
-    ),
+    ttl: parseNumber(process.env.REDIS_TTL, "REDIS_TTL"),
   },
 
   jwtSecret: process.env.JWT_SECRET!,
   jwtExpiresIn: process.env.JWT_EXPIRES_IN!,
 
-  jwtRefreshSecret:
-    process.env.JWT_REFRESH_SECRET!,
+  jwtRefreshSecret: process.env.JWT_REFRESH_SECRET!,
 
-  jwtRefreshExpiresIn:
-    process.env.JWT_REFRESH_EXPIRES_IN!,
+  jwtRefreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN!,
 
-  bcryptSaltRounds: parseNumber(
-    process.env.BCRYPT_SALT_ROUNDS || "10",
-    "BCRYPT_SALT_ROUNDS"
-  ),
+  bcryptSaltRounds: parseNumber(process.env.BCRYPT_SALT_ROUNDS || "10", "BCRYPT_SALT_ROUNDS"),
 
   corsOrigin: process.env.CORS_ORIGIN || "*",
 

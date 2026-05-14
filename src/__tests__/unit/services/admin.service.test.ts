@@ -50,15 +50,11 @@ describe("AdminService", () => {
     });
 
     it("should throw AppError for invalid userType", async () => {
-      await expect(
-        adminService.getAllUsers({ userType: "invalid" })
-      ).rejects.toThrow(AppError);
+      await expect(adminService.getAllUsers({ userType: "invalid" })).rejects.toThrow(AppError);
     });
 
     it("should throw AppError for invalid userStatus", async () => {
-      await expect(
-        adminService.getAllUsers({ userStatus: "invalid" })
-      ).rejects.toThrow(AppError);
+      await expect(adminService.getAllUsers({ userStatus: "invalid" })).rejects.toThrow(AppError);
     });
 
     it("should filter by search", async () => {
@@ -78,9 +74,7 @@ describe("AdminService", () => {
     });
 
     it("should throw AppError if user not found", async () => {
-      await expect(
-        adminService.deleteUser("64f1a2b3c4d5e6f7a8b9c0d1")
-      ).rejects.toThrow(AppError);
+      await expect(adminService.deleteUser("64f1a2b3c4d5e6f7a8b9c0d1")).rejects.toThrow(AppError);
     });
   });
 
@@ -125,9 +119,7 @@ describe("AdminService", () => {
     });
 
     it("should throw AppError if task not found", async () => {
-      await expect(
-        adminService.deleteTask("64f1a2b3c4d5e6f7a8b9c0d1")
-      ).rejects.toThrow(AppError);
+      await expect(adminService.deleteTask("64f1a2b3c4d5e6f7a8b9c0d1")).rejects.toThrow(AppError);
     });
   });
 

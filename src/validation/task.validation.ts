@@ -7,13 +7,11 @@ export const createTaskValidation = Joi.object({
 
   description: Joi.string().trim().min(5).max(1000).required(),
 
-  status: Joi
-    .string()
+  status: Joi.string()
     .valid(...TaskStatus.values)
     .default(TaskStatus.PENDING),
 
-  priority: Joi
-    .string()
+  priority: Joi.string()
     .valid(...TaskPriority.values)
     .default(TaskPriority.MEDIUM),
 
@@ -22,22 +20,18 @@ export const createTaskValidation = Joi.object({
   }),
 });
 
-export const updateTaskValidation = Joi
-  .object({
-    title: Joi.string().trim().min(3).max(100).optional(),
+export const updateTaskValidation = Joi.object({
+  title: Joi.string().trim().min(3).max(100).optional(),
 
-    description: Joi.string().trim().min(5).max(1000).optional(),
+  description: Joi.string().trim().min(5).max(1000).optional(),
 
-    status: Joi
-      .string()
-      .valid(...TaskStatus.values)
-      .optional(),
+  status: Joi.string()
+    .valid(...TaskStatus.values)
+    .optional(),
 
-    priority: Joi
-      .string()
-      .valid(...TaskPriority.values)
-      .optional(),
+  priority: Joi.string()
+    .valid(...TaskPriority.values)
+    .optional(),
 
-    dueDate: Joi.date().greater("now").optional(),
-  })
-  .min(1);
+  dueDate: Joi.date().greater("now").optional(),
+}).min(1);

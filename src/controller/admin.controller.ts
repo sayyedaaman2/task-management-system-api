@@ -1,8 +1,8 @@
 import type { Request, Response, NextFunction } from "express";
 
 import adminService from "@/service/admin.service.js";
-import { AppError } from "@/utils/error.js";
 import { clearCache } from "@/utils/cache.util.js";
+import { AppError } from "@/utils/error.js";
 
 export const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
   try {

@@ -7,7 +7,6 @@ import type { IUserDocument } from "@/model/user.model.js";
 import { UserTypes, UserStatus, TaskStatus } from "@/utils/constant.js";
 import { AppError } from "@/utils/error.js";
 
-
 interface UserFilters {
   $or?: Array<{
     name?: {

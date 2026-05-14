@@ -15,9 +15,7 @@ interface RedisConfig {
 /**
  * Initialize Redis Connection
  */
-export const connectRedis = async (
-  redis: RedisConfig
-): Promise<RedisClientType> => {
+export const connectRedis = async (redis: RedisConfig): Promise<RedisClientType> => {
   if (redisClient) {
     return redisClient;
   }
@@ -32,13 +30,9 @@ export const connectRedis = async (
 
       reconnectStrategy: (retries) => {
         if (retries > 10) {
-          logger.error(
-            "Redis reconnection failed after 10 attempts"
-          );
+          logger.error("Redis reconnection failed after 10 attempts");
 
-          return new Error(
-            "Redis reconnection failed"
-          );
+          return new Error("Redis reconnection failed");
         }
 
         return Math.min(retries * 100, 3000);
@@ -72,10 +66,7 @@ export const connectRedis = async (
   try {
     await redisClient.connect();
   } catch (err) {
-    logger.error(
-      { err },
-      "Initial Redis connection failed"
-    );
+    logger.error({ err }, "Initial Redis connection failed");
 
     redisClient = null;
 
@@ -90,9 +81,7 @@ export const connectRedis = async (
  */
 export const getRedisClient = (): RedisClientType => {
   if (!redisClient) {
-    throw new Error(
-      "Redis client not initialized. Call connectRedis() first."
-    );
+    throw new Error("Redis client not initialized. Call connectRedis() first.");
   }
 
   return redisClient;

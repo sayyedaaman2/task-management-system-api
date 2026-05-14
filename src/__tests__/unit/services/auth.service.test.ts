@@ -16,11 +16,7 @@ const { AppError } = await import("@/utils/error.js");
 describe("AuthService", () => {
   describe("register", () => {
     it("should register a new user successfully", async () => {
-      const user = await authService.register(
-        "Test User",
-        "test@example.com",
-        "Test@1234"
-      );
+      const user = await authService.register("Test User", "test@example.com", "Test@1234");
 
       expect(user).toHaveProperty("_id");
       expect(user.email).toBe("test@example.com");
@@ -36,11 +32,7 @@ describe("AuthService", () => {
     });
 
     it("should hash the password before saving", async () => {
-      const user = await authService.register(
-        "Test User",
-        "hash@example.com",
-        "Test@1234"
-      );
+      const user = await authService.register("Test User", "hash@example.com", "Test@1234");
 
       expect(user.password).not.toBe("Test@1234");
     });
@@ -59,15 +51,13 @@ describe("AuthService", () => {
     });
 
     it("should throw AppError if user not found", async () => {
-      await expect(
-        authService.login("notfound@example.com", "Test@1234")
-      ).rejects.toThrow(AppError);
+      await expect(authService.login("notfound@example.com", "Test@1234")).rejects.toThrow(
+        AppError
+      );
     });
 
     it("should throw AppError if password is incorrect", async () => {
-      await expect(
-        authService.login("login@example.com", "WrongPass")
-      ).rejects.toThrow(AppError);
+      await expect(authService.login("login@example.com", "WrongPass")).rejects.toThrow(AppError);
     });
   });
 

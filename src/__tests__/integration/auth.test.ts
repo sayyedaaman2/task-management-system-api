@@ -111,32 +111,32 @@ describe("Auth Routes", () => {
     });
 
     it("should return 200 with new accessToken if refresh token is valid", async () => {
-  await request(app).post("/api/v1/auth/register").send({
-    name: "Refresh User",
-    email: "refresh@example.com",
-    password: "Test@1234",
-  });
+      await request(app).post("/api/v1/auth/register").send({
+        name: "Refresh User",
+        email: "refresh@example.com",
+        password: "Test@1234",
+      });
 
-  const loginRes = await request(app).post("/api/v1/auth/login").send({
-    email: "refresh@example.com",
-    password: "Test@1234",
-  });
+      const loginRes = await request(app).post("/api/v1/auth/login").send({
+        email: "refresh@example.com",
+        password: "Test@1234",
+      });
 
-  console.log("login status:", loginRes.status);
-  console.log("cookies:", loginRes.headers["set-cookie"]);
+      console.log("login status:", loginRes.status);
+      console.log("cookies:", loginRes.headers["set-cookie"]);
 
-const cookies = (loginRes.headers["set-cookie"] as unknown) as string[];
-  const res = await request(app)
-    .get("/api/v1/auth/refresh-token")
-    .set("Cookie", cookies)
-    .set("Authorization", `Bearer ${loginRes.body.data.accessToken}`);
+      const cookies = loginRes.headers["set-cookie"] as unknown as string[];
+      const res = await request(app)
+        .get("/api/v1/auth/refresh-token")
+        .set("Cookie", cookies)
+        .set("Authorization", `Bearer ${loginRes.body.data.accessToken}`);
 
-  console.log("refresh status:", res.status);
-  console.log("refresh body:", res.body);
+      console.log("refresh status:", res.status);
+      console.log("refresh body:", res.body);
 
-  expect(res.status).toBe(200);
-  expect(res.body).toHaveProperty("accessToken");
-});
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty("accessToken");
+    });
   });
 
   describe("GET /api/v1/auth/profile", () => {
