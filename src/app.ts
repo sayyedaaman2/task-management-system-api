@@ -5,7 +5,7 @@ import swaggerUi from "swagger-ui-express";
 import healthCheck from "./controller/health.controller.js";
 
 import serverConfig from "@/config/env.js";
-import swaggerSpec from "@/config/swagger.js";
+import { apiSpec, rootSpec } from "@/config/swagger.js";
 import { cookieMiddleware } from "@/middleware/cookie.middleware.js";
 import { corsMiddleware } from "@/middleware/cors.middleware.js";
 import { globalErrorHandler } from "@/middleware/error.middleware.js";
@@ -38,9 +38,29 @@ app.use(corsMiddleware(corsOptions));
 //middleware to parse JSON bodies
 app.use(express.json());
 
-// swagger UI api-docs
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+// Root docs
+app.use(
+  "/api-docs/root",
+  swaggerUi.serveFiles(rootSpec),
+  swaggerUi.setup(rootSpec, {
+    customSiteTitle: "Health API Docs",
+    swaggerOptions: {
+      url: "/api-docs/root",
+    },
+  })
+);
 
+// API v1 docs
+app.use(
+  "/api-docs",
+  swaggerUi.serveFiles(apiSpec),
+  swaggerUi.setup(apiSpec, {
+    customSiteTitle: "Task Management API Docs",
+    swaggerOptions: {
+      url: "/api-docs",
+    },
+  })
+);
 // cookie parser middleware
 app.use(cookieMiddleware);
 

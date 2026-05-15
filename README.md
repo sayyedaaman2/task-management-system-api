@@ -4,7 +4,9 @@ A production-ready RESTful API built with **Node.js**, **Express**, **TypeScript
 
 🚀 **Live URL:** [https://task-management-system-api-c0j6.onrender.com](https://task-management-system-api-c0j6.onrender.com)
 
-📖 **Swagger Docs:** [https://task-management-system-api-c0j6.onrender.com/api-docs](https://task-management-system-api-c0j6.onrender.com/api-docs)
+📖 **API Docs:** [https://task-management-system-api-c0j6.onrender.com/api-docs](https://task-management-system-api-c0j6.onrender.com/api-docs)
+
+📖 **Health Docs:** [https://task-management-system-api-c0j6.onrender.com/api-docs/root](https://task-management-system-api-c0j6.onrender.com/api-docs/root)
 
 ---
 
