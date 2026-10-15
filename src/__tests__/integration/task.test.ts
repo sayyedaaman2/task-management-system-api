@@ -106,7 +106,7 @@ describe("Task Routes", () => {
       expect(res.status).toBe(404);
     });
 
-    it("should return 200 with task", async () => {
+    it("should return 200 with task for the owning user", async () => {
       const createRes = await request(app)
         .post("/api/v1/tasks")
         .set("Authorization", `Bearer ${accessToken}`)
@@ -124,6 +124,41 @@ describe("Task Routes", () => {
 
       expect(res.status).toBe(200);
       expect(res.body._id).toBe(createRes.body._id);
+    });
+
+    it("should return 404 when User A requests User B's task", async () => {
+      // User A creates a task
+      const createRes = await request(app)
+        .post("/api/v1/tasks")
+        .set("Authorization", `Bearer ${accessToken}`)
+        .send({
+          title: "User A Task",
+          description: "Belongs to User A",
+          dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+          priority: "low",
+          status: "pending",
+        });
+
+      // Register and log in as User B (unique email per run)
+      const uniqueSuffix = Date.now();
+      await request(app).post("/api/v1/auth/register").send({
+        name: "User B",
+        email: `userb_${uniqueSuffix}@example.com`,
+        password: "Test@1234",
+      });
+      const loginB = await request(app).post("/api/v1/auth/login").send({
+        email: `userb_${uniqueSuffix}@example.com`,
+        password: "Test@1234",
+      });
+      const tokenB = loginB.body.data.accessToken as string;
+
+      // User B tries to fetch User A's task — must be blocked
+      const res = await request(app)
+        .get(`/api/v1/tasks/${createRes.body._id}`)
+        .set("Authorization", `Bearer ${tokenB}`);
+
+      expect(res.status).toBe(404);
+      expect(res.body).not.toHaveProperty("title");
     });
   });
 

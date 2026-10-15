@@ -102,6 +102,17 @@ describe("TaskService", () => {
         taskService.getTaskById("64f1a2b3c4d5e6f7a8b9c0d1", user._id.toString())
       ).rejects.toThrow(AppError);
     });
+
+    it("should throw AppError when a different user tries to retrieve another user's task", async () => {
+      const ownerUser = await createUser();
+      const otherUser = await createUser();
+      const task = await createTask(ownerUser._id.toString());
+
+      // otherUser must NOT be able to fetch ownerUser's task
+      await expect(
+        taskService.getTaskById(task._id.toString(), otherUser._id.toString())
+      ).rejects.toThrow(AppError);
+    });
   });
 
   describe("updateTask", () => {

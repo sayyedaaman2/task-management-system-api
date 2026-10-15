@@ -111,10 +111,11 @@ class TaskService {
 
     const task = await TaskModel.findOne({
       _id: convertObjectId(taskId),
+      assignedTo: convertObjectId(userId),
     }).populate("assignedTo", "name email");
 
     if (!task) {
-      throw new AppError("Task not found", 404);
+      throw new AppError("Task not found or unauthorized", 404);
     }
 
     return task;
