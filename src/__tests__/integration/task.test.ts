@@ -141,15 +141,19 @@ describe("Task Routes", () => {
 
       // Register and log in as User B (unique email per run)
       const uniqueSuffix = Date.now();
-      await request(app).post("/api/v1/auth/register").send({
-        name: "User B",
-        email: `userb_${uniqueSuffix}@example.com`,
-        password: "Test@1234",
-      });
-      const loginB = await request(app).post("/api/v1/auth/login").send({
-        email: `userb_${uniqueSuffix}@example.com`,
-        password: "Test@1234",
-      });
+      await request(app)
+        .post("/api/v1/auth/register")
+        .send({
+          name: "User B",
+          email: `userb_${uniqueSuffix}@example.com`,
+          password: "Test@1234",
+        });
+      const loginB = await request(app)
+        .post("/api/v1/auth/login")
+        .send({
+          email: `userb_${uniqueSuffix}@example.com`,
+          password: "Test@1234",
+        });
       const tokenB = loginB.body.data.accessToken as string;
 
       // User B tries to fetch User A's task — must be blocked
